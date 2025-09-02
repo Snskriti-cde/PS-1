@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+//encode function
+string encode(string s , int shift)
+{
+  for(int i=0;i<s.length();i++)
+  {
+      if (s[i] >= 'A' && s[i] <= 'Z') {
+        s[i] = 'A' + (s[i] - 'A' + shift) % 26;
+    }
+    else if (s[i] >= 'a' && s[i] <= 'z') {
+        s[i] = 'a' + (s[i] - 'a' + shift) % 26;
+    }
+  }
+  
+  return s;
+}
+
+
+//decode function 
+string decode(string s , int shift)
+{
+  
+ shift = (26 - (shift % 26)) % 26;
+  for(int i=0;i<s.length();i++)
+  {
+      if (s[i] >= 'A' && s[i] <= 'Z') {
+        s[i] = 'A' + (s[i] - 'A' + shift) % 26;
+    }
+    else if (s[i] >= 'a' && s[i] <= 'z') {
+        s[i] = 'a' + (s[i] - 'a' + shift) % 26;
+    }
+  }
+  
+  return s;
+}
+
+
+int main() 
+{
+    cout << "Welcome To Captian's Cypher"<<endl;
+    cout<<"Enter 0 for encoding , any number for decoding"<<endl;
+    int process;
+    cin>>process;
+    
+    if(process==0)
+    {
+        cout<<"Enter your message to encrypt"<<endl;
+        string mess;
+        cin>>mess;
+        cout<<"Enter the key (shift value)"<<endl;
+        int shift;
+        cin>>shift;
+        
+        string ans = encode(mess,shift);
+        cout<<"Your encoded message : "<<ans<<endl;
+    }
+    else 
+    {
+      cout<<"Enter your message to decrypt"<<endl;
+        string mess;
+        cin>>mess;
+        cout<<"Enter the key (shift value)"<<endl;
+        int shift;
+        cin>>shift;
+        
+        string ans = decode(mess,shift);
+        cout<<"Your decoded message : "<<ans<<endl;
+        cout<<"Created by Sanskriti:) Roll.No : ee250002065 "<<endl;
+
+    }
+    return 0;
+}
