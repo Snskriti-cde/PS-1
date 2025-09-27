@@ -1,0 +1,89 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <cctype>
+
+using namespace std;
+
+vector<string> encrypt(string text){
+    vector<string> shifted_text;
+    for(int shift = 1; shift < 26; shift++){
+        string result = "";
+        for(char c : text){
+            if(isupper(c)) result += (c - 'A' + shift) % 26 + 'A';
+            else if(islower(c)) result += (c - 'a' + shift) % 26 + 'a';
+            else result += c;
+        }
+        shifted_text.push_back(result);
+    }
+    return shifted_text;
+}
+
+map<char, double> getEnglishFrequencies() {
+    return {
+        {'A', 8.17}, {'B', 1.49}, {'C', 2.78}, {'D', 4.25}, {'E', 12.70},
+        {'F', 2.23}, {'G', 2.02}, {'H', 6.09}, {'I', 6.97}, {'J', 0.15},
+        {'K', 0.77}, {'L', 4.03}, {'M', 2.41}, {'N', 6.75}, {'O', 7.51},
+        {'P', 1.93}, {'Q', 0.10}, {'R', 5.99}, {'S', 6.33}, {'T', 9.06},
+        {'U', 2.76}, {'V', 0.98}, {'W', 2.36}, {'X', 0.15}, {'Y', 1.97}, {'Z', 0.07}
+    };
+}
+
+vector<double> findletterfrequencies(const string& text){
+    vector<int> count(26,0);
+    int total = 0;
+    for(char c : text){
+        if(isalpha(c)){
+            count[toupper(c) - 'A']++;
+            total++;
+        }
+    }
+    vector<double> percentage(26,0.0);
+    if(total > 0){
+        for(int i = 0; i < 26; i++){
+            percentage[i] = (count[i]*100.0)/total;
+        }
+    }
+    return percentage;
+}
+
+double chiSquared(const vector<double> &observed, const map<char,double>& engFreq){
+    double chi2 = 0.0;
+    for(int i = 0; i < 26; i++){
+        char letter = 'A' + i;
+        double expected = engFreq.at(letter);
+        double diff = observed[i] - expected;
+        chi2 += (diff*diff)/expected;
+    }
+    return chi2;
+}
+
+int bestshift(const vector<string> &all_text, const map<char, double> &engFreq){
+    double bestscore = 1e9;
+    int bestindex = -1;
+    for(int i = 0; i < all_text.size(); i++){
+        vector<double> observed = findletterfrequencies(all_text[i]);
+        double score = chiSquared(observed, engFreq);
+        if(score < bestscore){
+            bestscore = score;
+            bestindex = i;
+        }
+    }
+    return bestindex;
+}
+
+int main() {
+    string text;
+    cout << "Enter the message to encrypt: ";
+    getline(cin, text);
+
+    vector<string> all_text = encrypt(text);
+    map<char,double> engfreq = getEnglishFrequencies();
+    int bestindex = bestshift(all_text, engfreq);
+
+    cout << "Best shift: " << bestindex + 1 << endl;
+    cout << "Decrypted message: " << all_text[bestindex] << endl;
+
+    return 0;
+}
