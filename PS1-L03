@@ -1,4 +1,6 @@
 //PS1 -L03 
+//keyword can be uppercase lower case and digit also 
+// the code encrypt and decrypt according to BASE64 character chart
 #include <iostream>
 #include <string>
 #include <vector>
