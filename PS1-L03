@@ -1,1 +1,181 @@
+//PS1 -L03 
+#include <iostream>
+#include <string>
+#include <vector>
+#include <bitset>
+#include <cctype>
+using namespace std ;
+
+const string BASE64 = 
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+//function for finding sift values from the keyword as pr base64
+vector<int> keyshifts(const string &keyword){
+    vector<int> shifts;
+    for(char c: keyword){
+        if(isalpha(c)){
+           if(isupper(c)){
+            shifts.push_back(c-'A');//0-25
+           }
+           else {
+            shifts.push_back(c-'a' + 26);//26-51
+           }
+        }
+        else if (isdigit(c)){
+            shifts.push_back(c-'0'+52);//52-61
+        }
+        else if(c== '+'){
+            shifts.push_back(62);//62
+        }
+        else if(c == '/'){
+            shifts.push_back(63);//63
+        }
+    }
+    return shifts;
+}
+
+//encryption of the string --------------------------------
+string encdrypted(const string &text,const vector<int> &shifts){
+    int index = 0;
+    int n = shifts.size();//lenght of keyword
+    string result = "";
+
+    for(char c: text){
+        if(isalpha(c)){
+            int shift = shifts[index%n];
+            if(isupper(c)){
+                char encr = (c-'A' + shift)%26 + 'A';//shifting
+                result += encr; 
+                index++;
+            }
+            else if(islower(c)){
+                char encr = (c-'a'+shift)%26 + 'a';
+                result += encr; 
+                index++;
+            }
+            
+        }
+        else if(isdigit(c)){
+              int shift = shifts[index%n];
+                char encr = (c - '0' + shift)%10 + '0';
+                result+=encr;
+                index ++;
+            }
+        else result +=c;
+    }
+    return result;
+}
+
+//decryption of string----------------------------------------------
+string decrypt(const string &text,const vector<int> &shifts){
+    string result;
+    int n = shifts.size();
+    int index = 0;
+    // for(char c : text){
+    //     if(isalpha(c)){
+    //     char base = isupper(c) ? 'A' : 'a';
+    //     int shift = shifts[index % n];
+    //     char decr = (c - base - shift + 26)%26 + base;
+    //     result += decr;
+    //     index ++;
+    //     }
+    //     else{
+    //         result += c;
+    //     }
+    // }
+    for(char c: text){
+        int shift = shifts[index%n];
+        if(isalpha(c)){
+        if(isupper(c)){
+        char decr = (abs(c-'A' - (shift%26) + 26))%26 + 'A';
+        result += decr;
+        index ++;
+        }
+
+        else if (islower(c)){
+        char decr = (c-'a'- (shift%26) + 26)%26 + 'a';
+        result += decr;
+        index ++;
+        }
+    }
+    else if(isdigit(c)){
+        char decr = (abs(c - '0' - (shift%10) + 10))%10 + '0';
+        result += decr;
+        index ++;
+    }
+    else  result+= c;
+    }
+    return result;
+}
+
+//base64 code for encryoted text
+string base64encode(const string &input) {
+    string output;
+    int bits = 0;       // stores accumulated bits
+    int bitCount = 0;   // number of bits currently in 'bits'
+
+    for (unsigned char c : input) {
+        bits = (bits << 8) | c;  // add 8 bits
+        bitCount += 8;
+
+        while (bitCount >= 6) {
+            int index = (bits >> (bitCount - 6)) & 0x3F; // take top 6 bits
+            output += BASE64[index];
+            bitCount -= 6;
+        }
+    }
+
+    if (bitCount > 0) { // leftover bits
+        int index = (bits << (6 - bitCount)) & 0x3F;
+        output += BASE64[index];
+    }
+
+    // pad with '=' to make multiple of 4
+    while (output.size() % 4) output += '=';
+
+    return output;
+}
+
+string base64decode(const string &input) {
+    vector<int> T(256, -1);
+    for (int i = 0; i < 64; i++) T[BASE64[i]] = i;
+
+    string output;
+    int val = 0, valb = -8;
+    for (unsigned char c : input) {
+        if (T[c] == -1) break;
+        val = (val << 6) + T[c];
+        valb += 6;
+        if (valb >= 0) {
+            output.push_back(char((val >> valb) & 0xFF));
+            valb -= 8;
+        }
+    }
+    return output;
+}
+
+//------------main-------------------//
+int main(){
+string keyword;
+cout<<"Enter keyword: ";
+cin>>keyword;
+cin.ignore();
+string text;
+cout<< "Enter text: ";
+getline(cin,text);
+
+vector<int> shifts = keyshifts(keyword);
+
+//encrypt
+string caesartext = encdrypted(text,shifts);
+string encoded = base64encode(caesartext);
+cout<< "Encrypted BASE64 text: "<<encoded <<endl;
+
+//decrypt
+string decoded = base64decode(encoded);
+string original = decrypt(decoded,shifts);
+cout<<"Decrypted: "<<original <<endl;
+cout<<"Coded by Sanskriti Panchal EE ";
+}
+
 
